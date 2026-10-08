@@ -12,7 +12,15 @@ public class Customer {
     private double creditLimit;
 
     public Customer(String code, String name, double creditLimit) {
-        // TODO: validate constructor arguments
+        if (code == null || code.isBlank()) {
+            throw new IllegalArgumentException(" code не может быть null или пустым");
+        }
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("name не может быть null или пустым");
+        }
+        if (creditLimit < 0) {
+            throw new IllegalArgumentException("creditLimit должен быть >= 0");
+        }
         this.code = code;
         this.name = name;
         this.creditLimit = creditLimit;
@@ -36,27 +44,32 @@ public class Customer {
     }
 
     public void rename(String newName) {
-        // TODO: validate and change the customer name
-        throw new UnsupportedOperationException("TODO");
+        if (newName == null || newName.isBlank()) {
+            throw new IllegalArgumentException("newName не может быть null или пустым");
+        }
+        this.name = newName;
     }
 
+
     public void changeCreditLimit(double newCreditLimit) {
-        // TODO: validate and change the credit limit
-        throw new UnsupportedOperationException("TODO");
+        if (newCreditLimit < 0) {
+            throw new IllegalArgumentException("newCreditLimit должно быть >= 0");
+        }
+        this.creditLimit = newCreditLimit;
     }
 
     public void activate() {
-        // TODO: activate the customer
-        throw new UnsupportedOperationException("TODO");
+        this.active = true;
     }
 
     public void deactivate() {
-        // TODO: deactivate the customer
-        throw new UnsupportedOperationException("TODO");
+        this.active = false;
     }
 
     public boolean canPlaceOrder(double orderTotal) {
-        // TODO: return true only for an active customer whose order fits the credit limit
-        throw new UnsupportedOperationException("TODO");
+        if (orderTotal < 0) {
+            throw new IllegalArgumentException("orderTotal не может быть отрицательным");
+        }
+        return active && orderTotal <= creditLimit;
     }
 }
