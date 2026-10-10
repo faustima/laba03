@@ -13,7 +13,9 @@ public class Order {
     private Payment payment;
 
     public Order(Customer customer) {
-        // TODO: validate customer
+        if (customer == null) {
+            throw new IllegalArgumentException("customer не может быть null");
+        }
         this.customer = customer;
         this.items = new ArrayList<>();
         this.status = OrderStatus.CREATED;
@@ -36,32 +38,66 @@ public class Order {
     }
 
     public void addItem(Product product, int quantity) {
-        // TODO: items may be added only while the order is CREATED
-        throw new UnsupportedOperationException("TODO");
+        if (status != OrderStatus.CREATED) {
+            throw new IllegalStateException("Нельзя добавить позицию: статус заказа — " + status);
+        }
+        // Создаём OrderItem — он сам проверит product и quantity
+        OrderItem item = new OrderItem(product, quantity);
+        items.add(item);
     }
 
     public double total() {
-        // TODO: sum amounts of all order items
-        throw new UnsupportedOperationException("TODO");
+        double sum = 0.0;
+        for (OrderItem item : items) {
+            sum += item.getAmount();
+        }
+        return sum;
     }
 
     public void confirm() {
-        // TODO: confirm a non-empty CREATED order for an active customer within the credit limit
-        throw new UnsupportedOperationException("TODO");
+        if (status != OrderStatus.CREATED) {
+            throw new IllegalStateException("Подтвердить можно только CREATED-заказ");
+        }
+        if (items.isEmpty()) {
+            throw new IllegalStateException("Нельзя подтвердить пустой заказ");
+        }
+        if (!customer.isActive()) {
+            throw new IllegalStateException("customer неактивен");
+        }
+        if (total() > customer.getCreditLimit()) {
+            throw new IllegalStateException("total  превышает кредитный лимит");
+        }
+        this.status = OrderStatus.CONFIRMED;
     }
 
     public void cancel() {
-        // TODO: allow cancellation only before payment
-        throw new UnsupportedOperationException("TODO");
+        if (status == OrderStatus.PAID) {
+            throw new IllegalStateException("Оплаченный заказ отменить нельзя");
+        }
+        if (status == OrderStatus.CANCELLED) {
+            throw new IllegalStateException("Заказ уже отменён");
+        }
+        this.status = OrderStatus.CANCELLED;
     }
 
     public void pay(Payment payment) {
-        // TODO: accept only a successful payment for the exact total of a CONFIRMED order
-        throw new UnsupportedOperationException("TODO");
+        if (payment == null) {
+            throw new IllegalArgumentException("Платёж не может быть null");
+        }
+        if (status != OrderStatus.CONFIRMED) {
+            throw new IllegalStateException("Оплатить можно только CONFIRMED-заказ");
+        }
+        if (!payment.isSuccessful()) {
+            throw new IllegalStateException("Платёж не является успешным");
+        }
+        if (payment.getAmount() != total()) {
+            throw new IllegalArgumentException("Сумма платежа не совпадает с суммой заказа");
+        }
+        this.payment = payment;
+        this.status = OrderStatus.PAID;
     }
 
     public boolean isPaid() {
-        // TODO: return true only for PAID order
-        throw new UnsupportedOperationException("TODO");
+        return status == OrderStatus.PAID;
     }
 }
